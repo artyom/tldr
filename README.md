@@ -1,0 +1,1 @@
+tldr is a wrapper around [llmcli](https://github.com/artyom/llmcli).
