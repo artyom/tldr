@@ -32,6 +32,15 @@ func run(args []string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	if foldbin, err := exec.LookPath("fold"); err == nil {
+		foldcmd := exec.Command(foldbin, "-s")
+		if foldinput, err := foldcmd.StdinPipe(); err == nil {
+			cmd.Stdout = foldinput
+			foldcmd.Stdout = os.Stdout
+			defer foldcmd.Run()
+			defer foldinput.Close() // fold will not exit until standard input is closed
+		}
+	}
 	return cmd.Run()
 }
 
