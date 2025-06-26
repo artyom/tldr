@@ -4,9 +4,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
+	"sync"
 )
 
 func main() {
@@ -32,16 +34,22 @@ func run(args []string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	var wg sync.WaitGroup
 	if foldbin, err := exec.LookPath("fold"); err == nil {
 		foldcmd := exec.Command(foldbin, "-s")
 		if foldinput, err := foldcmd.StdinPipe(); err == nil {
 			cmd.Stdout = foldinput
 			foldcmd.Stdout = os.Stdout
-			defer foldcmd.Run()
-			defer foldinput.Close() // fold will not exit until standard input is closed
+			wg.Go(func() { foldcmd.Run() })
 		}
 	}
-	return cmd.Run()
+	var err error
+	wg.Go(func() {
+		defer cmd.Stdout.(io.Closer).Close() // fold will not exit until its standard input is closed
+		err = cmd.Run()
+	})
+	wg.Wait()
+	return err
 }
 
 func init() {
