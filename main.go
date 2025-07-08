@@ -8,7 +8,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/language/display"
 )
 
 func main() {
@@ -30,6 +34,17 @@ func run(args []string) error {
 		llmcliArgs = append(llmcliArgs, "-f", s)
 	}
 	llmcliArgs = append(llmcliArgs, "What's the tl;dr version of this?")
+	for _, env := range [...]string{"LC_ALL", "LC_MESSAGES", "LANG"} {
+		if s, ok := os.LookupEnv(env); ok && s != "" {
+			// "en_US.CODESET@modifier" into "en_US"
+			s, _, _ = strings.Cut(s, ".")
+			s, _, _ = strings.Cut(s, "@")
+			if tag, err := language.Parse(s); err == nil {
+				llmcliArgs = append(llmcliArgs, "Please respond in "+display.English.Languages().Name(tag)+".")
+				break
+			}
+		}
+	}
 	cmd := exec.Command("llmcli", llmcliArgs...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
