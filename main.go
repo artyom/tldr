@@ -49,6 +49,7 @@ func run(args []string) error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Env = append(os.Environ(), "LLMCLI_MUTE_THINKING=1")
 	var wg sync.WaitGroup
 	if foldbin, err := exec.LookPath("fold"); err == nil {
 		foldcmd := exec.Command(foldbin, "-s")
