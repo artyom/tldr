@@ -51,8 +51,8 @@ func run(args []string) error {
 	cmd.Stderr = os.Stderr
 	cmd.Env = append(os.Environ(), "LLMCLI_MUTE_THINKING=1")
 	var wg sync.WaitGroup
-	if foldbin, err := exec.LookPath("fold"); err == nil {
-		foldcmd := exec.Command(foldbin, "-s")
+	if bin, err := exec.LookPath("fmt"); err == nil {
+		foldcmd := exec.Command(bin)
 		if foldinput, err := foldcmd.StdinPipe(); err == nil {
 			cmd.Stdout = foldinput
 			foldcmd.Stdout = os.Stdout
@@ -61,7 +61,7 @@ func run(args []string) error {
 	}
 	var err error
 	wg.Go(func() {
-		defer cmd.Stdout.(io.Closer).Close() // fold will not exit until its standard input is closed
+		defer cmd.Stdout.(io.Closer).Close() // fmt will not exit until its standard input is closed
 		err = cmd.Run()
 	})
 	wg.Wait()
