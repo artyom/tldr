@@ -33,7 +33,7 @@ func run(args []string) error {
 	for _, s := range args {
 		llmcliArgs = append(llmcliArgs, "-f", s)
 	}
-	llmcliArgs = append(llmcliArgs, "What's the tl;dr version of this?")
+	llmcliArgs = append(llmcliArgs, "What's the tl;dr version of this? Respond in plain text, regular paragraphs without lists.")
 	for _, env := range [...]string{"LC_ALL", "LC_MESSAGES", "LANG"} {
 		if s, ok := os.LookupEnv(env); ok && s != "" {
 			// "en_US.CODESET@modifier" into "en_US"
